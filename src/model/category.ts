@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { CategorySchemaType } from '../interface/modelInterface';
 
 const productSchema = new mongoose.Schema(
   {
@@ -19,6 +20,6 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-const Member = mongoose.model('Member', productSchema);
+const Category = mongoose.model<CategorySchemaType>('Category', productSchema);
 
-export { Member };
+export { Category };

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { ProductSchemaType } from '../interface/modelInterface';
 
 const productSchema = new mongoose.Schema(
   {
@@ -12,7 +13,7 @@ const productSchema = new mongoose.Schema(
       type: String,
       lowercase: true,
       index: true,
-      required: [true, 'Name is missing'],
+      required: [true, 'Title is missing'],
       unique: true,
       trim: true
     },
@@ -33,6 +34,6 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-const Member = mongoose.model('Member', productSchema);
+const Product = mongoose.model<ProductSchemaType>('Product', productSchema);
 
-export { Member };
+export { Product };
