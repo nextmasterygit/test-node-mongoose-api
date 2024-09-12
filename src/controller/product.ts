@@ -8,7 +8,7 @@ const model = Product;
 const modelName = 'Product';
 const MemberModel = Member;
 
-const { createOp, updateOp, deleteOp, listAggregation, lookupUnwindStage } =
+const { createOp, updateOp, deleteOp, listAggregation, lookupUnwindStage, lookupStage } =
   NodeMongooseApi(model);
 const memberModel = NodeMongooseApi(MemberModel);
 const {
@@ -22,9 +22,11 @@ const {
 // ##create test##
 export const create = handleFormAsync(
   async (req: Request, res: Response, next, err, fields, files) => {
+    console.log(fields, files);
     let data: ProductSchemaType;
     const { title, images, price, publishby, category } =
       utility.extractArrayItems(fields);
+    console.log(images);
     data = { title, price, publishby, category };
     data.images = JSON.parse(images);
 
@@ -36,8 +38,11 @@ export const create = handleFormAsync(
 export const createSession = handleAsyncSession(async (req, res, next, session) => {
   let data: ProductSchemaType = req.body;
   console.log(data);
-  const memberData: MemberSchemaType = { fullName: 'session test', phone: '1234' };
+  const memberData: MemberSchemaType = { fullName: 'session test 2', phone: '1234' };
+  // member create
   await memberModel.createOp.create({ data: memberData, options: { session } });
+
+  // product create
   const response = await createOp.create({ data, options: { session } });
   ResponseJson(res, 200, message.INSERT_SUCCESS, response);
 }, modelName);
@@ -61,7 +66,8 @@ export const list = handleAsync(async (req: Request, res: Response) => {
   const customParams: CustomParamsType = {
     lookup,
     projectionFields,
-    searchTerms: ['_id', 'name']
+    searchTerms: ['_id', 'title'],
+    numericSearchTerms: ['price']
   };
 
   const result = await listAggregation({

@@ -2,12 +2,6 @@ import mongoose from 'mongoose';
 import { MemberSchemaType } from '../interface/modelInterface';
 const memberSchema = new mongoose.Schema(
   {
-    id: {
-      type: String,
-      sparse: true,
-      unique: true,
-      trim: true
-    },
     fullName: {
       type: String,
       lowercase: true,
@@ -32,6 +26,10 @@ const memberSchema = new mongoose.Schema(
       sparse: true,
       lowercase: true,
       unique: true
+    },
+    deleted: {
+      type: String,
+      default: 'false'
     }
   },
   { timestamps: true }

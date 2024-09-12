@@ -3,12 +3,6 @@ import { CategorySchemaType } from '../interface/modelInterface';
 
 const productSchema = new mongoose.Schema(
   {
-    id: {
-      type: String,
-      sparse: true,
-      unique: true,
-      trim: true
-    },
     name: {
       type: String,
       lowercase: true,

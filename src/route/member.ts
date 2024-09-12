@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   create,
   list,
+  ownList,
   update,
   updateMany,
   updateManyFast,
@@ -20,6 +21,7 @@ router.delete('/remove/:id', remove);
 router.delete('/remove-many', removeMany);
 router.delete('/remove-many-fast', removeManyFast);
 router.get('/list/:query?', list);
+router.get('/ownlist/:query?', ownList);
 
 // Type alias for the router
 type memberRouter = Router;

@@ -5,7 +5,7 @@ const router = Router();
 
 router.post('/create', create);
 router.post('/create-session', createSession);
-router.get('/list', list);
+router.get('/list/:query?', list);
 
 // Type alias for the router
 type productRouter = Router;

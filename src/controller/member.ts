@@ -8,20 +8,32 @@ const model = Member;
 const modelName = 'Member';
 
 const { createOp, updateOp, deleteOp, listAggregation } = NodeMongooseApi(model);
-const { handleAsync, ResponseJson, utility, message } = helpers;
-// ##create test##
+const {
+  handleAsync,
+  handleAsyncSession,
+  handleFormAsync,
+  handleFormAsyncSession,
+  ResponseJson,
+  utility,
+  message
+} = helpers;
+// const creat = handleAsync(async(req,res,next)=>{
+//   try{}catch(err){}
+// },modelName,"this is error",400)
+// // ##create test##
 export const create = handleAsync(async (req: Request, res: Response) => {
   const data: MemberSchemaType = req.body;
   utility.removeUndefined(data);
   const response = await createOp.create({ data });
-  ResponseJson(res, 200, message.INSERT_SUCCESS, response);
+  // res.status(200).json({message:message.INSERT_SUCCESS,data:response})
+  ResponseJson(res, 201, message.INSERT_SUCCESS, response);
 }, modelName);
 
 // ##updating test##
 export const update = handleAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const data: MemberSchemaType = req.body;
-  const response = await updateOp.findByIdAndUpdate({ id, data });
+  const response = await updateOp.findByIdAndUpdate({ data, id });
   ResponseJson(res, 200, message.UPDATED_SUCCESS, response);
 }, modelName);
 export const updateMany = handleAsync(async (req: Request, res: Response) => {
@@ -52,34 +64,80 @@ export const removeManyFast = handleAsync(async (req: Request, res: Response) =>
 
 // ##list aggregation##
 export const list = handleAsync(async (req: Request, res: Response) => {
-  const customParams: CustomParamsType = {
-    projectionFields: {
-      _id: 1,
-      fullName: 1,
-      phone: 1,
-      createdAt: 1,
-      updatedAt: 1
-    },
-    searchTerms: ['_id', 'fullName']
-  };
-  const {
-    columnFilters,
-    fromDate,
-    toDate,
-    fieldDate,
-    limit,
-    searchTerm,
-    page,
-    sortField,
-    sortOrder,
-    deleted
-  }: QueryType = req.query;
+  // const customParams: CustomParamsType = {
+  //   projectionFields: {
+  //     _id: 1,
+  //     fullName: 1,
+  //     phone: 1,
+  //     createdAt: 1,
+  //     updatedAt: 1
+  //   },
+  //   searchTerms: ['_id', 'fullName'],
+  //   numericSearchTerms: []
+  // };
+
+  // const result = await listAggregation({
+  //   model,
+  //   customParams,
+  //   query: req.query
+  //   // ids: ['66cd4955ea80fe74a77a983b']
+  // });
+
+  const { columnFilters, searchTerm, fieldDate, sortField }: QueryType = req.query;
+
   const result = await listAggregation({
     model,
-    customParams,
-    query: req.query
-    // ids: ['66cd4955ea80fe74a77a983b']
+    query: req.query,
+    customParams: {
+      projectionFields: {
+        _id: 1,
+        fullName: 1,
+        phone: 1,
+        createdAt: 1,
+        updatedAt: 1
+      },
+
+      searchTerms: ['_id', 'fullName', 'phone', 'cnic']
+    }
   });
+  if (result) {
+    const { data, total } = result;
+    return ResponseJson(res, 200, message.SUCCESS, data, total);
+  }
+}, modelName);
+
+// ##own aggregation##
+export const ownList = handleAsync(async (req: Request, res: Response) => {
+  const ownPipeline = ({}) => {
+    const dataPipeline = [
+      {
+        $facet: {
+          totalRecords: [{ $count: 'total' }],
+          data: [
+            {
+              $project: {
+                _id: 1,
+                fullName: 1,
+                phone: 1,
+                createdAt: 1,
+                updatedAt: 1
+              }
+            }
+          ]
+        }
+      },
+      { $unwind: '$totalRecords' },
+      { $project: { total: '$totalRecords.total', data: '$data' } }
+    ];
+    return dataPipeline;
+  };
+
+  const result = await listAggregation({
+    model,
+    query: req.query,
+    ownPipeline
+  });
+  console.log(result);
   if (result) {
     const { data, total } = result;
     return ResponseJson(res, 200, message.SUCCESS, data, total);

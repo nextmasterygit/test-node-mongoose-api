@@ -3,12 +3,6 @@ import { ProductSchemaType } from '../interface/modelInterface';
 
 const productSchema = new mongoose.Schema(
   {
-    id: {
-      type: String,
-      sparse: true,
-      unique: true,
-      trim: true
-    },
     title: {
       type: String,
       lowercase: true,
